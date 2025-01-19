@@ -59,57 +59,71 @@ public class Main extends JPanel {
         this.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void handleGraphClick(Point clickedPoint) {
-        boolean onExistingVertex = false;
-
-        // Kiểm tra xem người dùng có nhấp vào một đỉnh đã tồn tại không
-        for (Point vertex : graph.vertices) {
-            if (vertex.distance(clickedPoint) < 20) {
-                onExistingVertex = true;
-                if (selectedVertex == null) {
-                    // Chọn đỉnh đầu tiên
-                    selectedVertex = vertex;
-                } else {
-                    // Chọn đỉnh thứ hai và hiển thị hộp thoại nhập trọng số
-                    int sourceIndex = graph.vertices.indexOf(selectedVertex);
-                    int destIndex = graph.vertices.indexOf(vertex);
-
-                    String message = String.format(
-                        "Weight between Vertex %d and Vertex %d:",
-                        sourceIndex, destIndex
-                    );
-
-                    String weightStr = JOptionPane.showInputDialog(
-                        this, message, "Edge Weight", JOptionPane.PLAIN_MESSAGE
-                    );
-
-                    if (weightStr != null && !weightStr.isEmpty()) {
-                        try {
-                            int weight = Integer.parseInt(weightStr);
-                            graph.addEdge(sourceIndex, destIndex, weight);
-                        } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(
-                                this, "Invalid weight!", "Error", JOptionPane.ERROR_MESSAGE
-                            );
+        private void handleGraphClick(Point clickedPoint) {
+            boolean onExistingVertex = false;
+        
+            // Kiểm tra xem người dùng có nhấp vào một đỉnh đã tồn tại không
+            for (Point vertex : graph.vertices) {
+                if (vertex.distance(clickedPoint) < 20) {
+                    onExistingVertex = true;
+                    if (selectedVertex == null) {
+                        // Chọn đỉnh đầu tiên
+                        selectedVertex = vertex;
+                    } else {
+                        // Chọn đỉnh thứ hai và hiển thị hộp thoại nhập trọng số
+                        int sourceIndex = graph.vertices.indexOf(selectedVertex);
+                        int destIndex = graph.vertices.indexOf(vertex);
+        
+                        String message = String.format(
+                            "Enter weight for edge between Vertex %d and Vertex %d:",
+                            sourceIndex, destIndex
+                        );
+        
+                        String weightStr = JOptionPane.showInputDialog(
+                            this, message, "Edge Weight", JOptionPane.PLAIN_MESSAGE
+                        );
+        
+                        if (weightStr != null && !weightStr.isEmpty()) {
+                            try {
+                                int weight = Integer.parseInt(weightStr);
+        
+                                if (weight < 0) {
+                                    JOptionPane.showMessageDialog(
+                                        this,
+                                        "Weight cannot be negative!",
+                                        "Invalid Input",
+                                        JOptionPane.ERROR_MESSAGE
+                                    );
+                                } else {
+                                    graph.addEdge(sourceIndex, destIndex, weight);
+                                }
+        
+                            } catch (NumberFormatException ex) {
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "Invalid weight! Please enter a valid number.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                                );
+                            }
                         }
+        
+                        // Hủy trạng thái chọn nếu không nhập hoặc nhập không hợp lệ
+                        selectedVertex = null;
+                        repaint();
+                        return;
                     }
-
-                    // Hủy bỏ trạng thái chọn nếu "Cancel" hoặc không nhập gì
-                    selectedVertex = null;
-                    repaint();
-                    return;
+                    break;
                 }
-                break;
+            }
+        
+            // Nếu nhấp vào không phải đỉnh nào, thêm đỉnh mới
+            if (!onExistingVertex) {
+                graph.addVertex(clickedPoint);
+                selectedVertex = null; // Hủy trạng thái chọn
+                repaint();
             }
         }
-
-        // Nếu nhấp vào không phải đỉnh nào, thêm đỉnh mới
-        if (!onExistingVertex) {
-            graph.addVertex(clickedPoint);
-            selectedVertex = null;  // Hủy trạng thái chọn
-            repaint();
-        }
-    }
 
     //Vẽ trên đồ thị
     private void drawGraph(Graphics2D g2d) {
